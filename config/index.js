@@ -1,0 +1,4 @@
+module.exports = {
+	AUTH_TOKEN_SECRET: "1234567890auth",
+	REFRESH_TOKEN_SECRET: "1234567890refresh",
+};
