@@ -31,8 +31,8 @@ const UserSchema = new Schema(
 		},
 		user_type: {
 			type: String,
-			enum: ["student", "guru"],
 			default: "student",
+			enum: ["student", "guru", "developer"],
 		},
 	},
 	{

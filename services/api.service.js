@@ -1,10 +1,11 @@
 "use strict";
 
 const ApiGateway = require("moleculer-web");
+const ApolloService = require("../graphql");
 const DB_CONNECTOR = require("../config/db");
-const { authMiddleware } = require("../functions/auth");
-
 const { UnAuthorizedError } = ApiGateway.Errors;
+const { authMiddleware } = require("../functions/auth");
+const { errlogger, logger } = require("../functions/logger");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -14,7 +15,7 @@ const { UnAuthorizedError } = ApiGateway.Errors;
 
 module.exports = {
 	name: "api",
-	mixins: [ApiGateway],
+	mixins: [ApiGateway, ApolloService],
 	// More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
 	settings: {
 		// Exposed port
@@ -106,7 +107,6 @@ module.exports = {
 			options: {},
 		},
 	},
-
 	methods: {
 		/**
 		 *--> Authenticate the request. It check the `Authorization` token value in the request header.
@@ -126,12 +126,25 @@ module.exports = {
 				if (authToken) {
 					let authUser = await authMiddleware(authToken);
 					if (!authUser) {
+						errlogger.info(`
+							AUTH_JWT_ERROR
+							${authToken}
+						`);
 						throw new UnAuthorizedError("INVALID_TOKEN");
 					} else {
 						// Returns the resolved user. It will be set to the `ctx.meta.user`
+						logger.info(`
+							AUTH_JWT_SUCCESS
+							AUTH_USER_ID: ${authUser._id}
+							AUTH_USER_NAME: ${authUser.name}
+						`);
 						return authUser;
 					}
 				} else {
+					errlogger.info(`
+						JWT_TOKEN_ERR:
+						${authToken}
+					`);
 					throw new UnAuthorizedError("NO_TOKEN");
 				}
 			} else {
@@ -149,10 +162,13 @@ module.exports = {
 		 * @returns { Promise }
 		 */
 		async authorize(ctx, route, req) {
-			if (
-				req.$action.role &&
-				req.$action.role !== ctx.meta.user.user_type
-			) {
+			const { user } = ctx.meta;
+			if (req.$action.role && req.$action.role !== user.user_type) {
+				errlogger.info(`
+					AUTHORIZATION_ERR:
+					USER_ID: ${user._id}
+					USER_ROLE: ${user.role}
+				`);
 				throw new UnAuthorizedError("NO_RIGHTS");
 			} else {
 				return null;

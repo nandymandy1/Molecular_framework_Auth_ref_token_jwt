@@ -3,6 +3,7 @@
 const Joi = require("joi");
 const { Course } = require("../models");
 const { newCourseValidation } = require("../validators/course");
+const { logger, errlogger } = require("../functions/logger");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -38,8 +39,20 @@ module.exports = {
 						...params,
 						author: meta.user._id,
 					});
-					return await newCourse.save();
+
+					let result = await newCourse.save();
+					logger.info(`
+						COURSE_CREATED
+						COURSE_ID: ${result._id}
+						by USER_ID: ${result.author}
+					`);
+					return result;
 				} catch (err) {
+					errlogger.info(`
+						CREATE_COURSE_ERROR 
+						MESSAGE: ${err.message}
+						by UserID: ${meta.user._id}
+					`);
 					return {
 						err: err.message,
 					};
