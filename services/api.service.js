@@ -41,30 +41,31 @@ module.exports = {
 				autoAliases: true,
 				aliases: {},
 
-				/** 
+				/**
 				 * Before call hook. You can check the request.
-				 * @param {Context} ctx 
-				 * @param {Object} route 
-				 * @param {IncomingRequest} req 
-				 * @param {ServerResponse} res 
+				 * @param {Context} ctx
+				 * @param {Object} route
+				 * @param {IncomingRequest} req
+				 * @param {ServerResponse} res
 				 * @param {Object} data
-				 * 
-				onBeforeCall(ctx, route, req, res) {
-					// Set request headers to context meta
-					ctx.meta.userAgent = req.headers["user-agent"];
-				}, */
+				 **/
+				// onBeforeCall(ctx, route, req, res) {
+				// 	// Set request headers to context meta
+				// 	ctx.meta.userAgent = req.headers["user-agent"];
+				// },
 
 				/**
 				 * After call hook. You can modify the data.
-				 * @param {Context} ctx 
-				 * @param {Object} route 
-				 * @param {IncomingRequest} req 
-				 * @param {ServerResponse} res 
+				 * @param {Context} ctx
+				 * @param {Object} route
+				 * @param {IncomingRequest} req
+				 * @param {ServerResponse} res
 				 * @param {Object} data
-				onAfterCall(ctx, route, req, res, data) {
-					// Async function which return with Promise
-					return doSomething(ctx, res, data);
-				}, */
+				 */
+				// onAfterCall(ctx, route, req, res, data) {
+				// 	// Async function which return with Promise
+				// 	// return doSomething(ctx, res, data);
+				// },
 
 				// Calling options. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Calling-options
 				callingOptions: {},
@@ -81,7 +82,6 @@ module.exports = {
 						limit: "400mb",
 					},
 				},
-
 				// Mapping policy setting. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Mapping-policy
 				// Available values: "all", "restrict"
 				mappingPolicy: "restricted",
@@ -106,11 +106,11 @@ module.exports = {
 
 	methods: {
 		/**
-		 * Authenticate the request. It check the `Authorization` token value in the request header.
-		 * Check the token value & resolve the user by the token.
-		 * The resolved user will be available in `ctx.meta.user`
+		 *--> Authenticate the request. It check the `Authorization` token value in the request header.
+		 *--> Check the token value & resolve the user by the token.
+		 *--> The resolved user will be available in `ctx.meta.user`
 		 *
-		 * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
+		 *--> PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
 		 *
 		 * @param {Context} ctx
 		 * @param {Object} route
@@ -143,10 +143,10 @@ module.exports = {
 		 *
 		 * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
 		 *
-		 * @param {Context} ctx
-		 * @param {Object} route
-		 * @param {IncomingRequest} req
-		 * @returns {Promise}
+		 * @param { Context } ctx
+		 * @param { Object } route
+		 * @param { IncomingRequest } req
+		 * @returns { Promise }
 		 */
 		async authorize(ctx, route, req) {
 			// // Get the authenticated user.
@@ -157,7 +157,7 @@ module.exports = {
 			// }
 		},
 	},
-	created() {
-		DB_CONNECTOR();
+	async created() {
+		await DB_CONNECTOR();
 	},
 };

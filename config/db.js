@@ -1,6 +1,5 @@
+const { DB } = require("./index");
 const { connect } = require("mongoose");
-
-// const DB = "mongodb://localhost:27017/mole-app";
 
 const connectDB = async () => {
 	try {

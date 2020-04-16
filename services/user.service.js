@@ -1,7 +1,10 @@
 "use strict";
 
+const Joi = require("joi");
 const _ = require("lodash");
-const { User } = require("../models");
+const { User, Course } = require("../models");
+const { newCourseValidation } = require("../validators/course");
+const { loginValidate, registerValidate } = require("../validators/user");
 const { issueToken, issueNewTokens } = require("../functions/auth");
 
 /**
@@ -37,6 +40,9 @@ module.exports = {
 			},
 			handler: async ({ params }) => {
 				try {
+					await Joi.validate(params, registerValidate, {
+						abortEarly: false,
+					});
 					let newUser = new User({ ...params });
 					let result = await newUser.save();
 					let tokens = await issueToken(result);
@@ -46,6 +52,7 @@ module.exports = {
 							"name",
 							"email",
 							"username",
+							"user_type",
 						]),
 						message: `Welcome ${params.name}`,
 						...tokens,
@@ -69,6 +76,9 @@ module.exports = {
 			},
 			handler: async ({ params }) => {
 				try {
+					await Joi.validate(params, loginValidate, {
+						abortEarly: false,
+					});
 					const { username, password } = params;
 					let user = await User.findOne({ username });
 					if (!user) {
@@ -85,30 +95,12 @@ module.exports = {
 								"name",
 								"email",
 								"username",
+								"user_type",
 							]),
 							message: `Welcome ${params.name}`,
 							...tokens,
 						};
 					}
-				} catch (err) {
-					// Implement the logger function here
-					return {
-						err: err.message,
-					};
-				}
-			},
-		},
-		me: {
-			rest: {
-				method: "GET",
-				path: "/me",
-			},
-			authentication: "required",
-			handler: async (ctx) => {
-				try {
-					return {
-						authUser: ctx.meta.user,
-					};
 				} catch (err) {
 					// Implement the logger function here
 					return {
@@ -132,9 +124,97 @@ module.exports = {
 					if (!tokens) {
 						throw new Error("Invalid Refresh Token");
 					}
+					return tokens;
+				} catch (err) {
 					return {
-						...tokens,
+						err: err.message,
 					};
+				}
+			},
+		},
+		me: {
+			rest: {
+				method: "GET",
+				path: "/me",
+			},
+			authentication: "required",
+			handler: async ({ meta }) => {
+				try {
+					return {
+						..._.pick(meta.user, [
+							"_id",
+							"name",
+							"email",
+							"username",
+							"user_type",
+						]),
+					};
+				} catch (err) {
+					// Implement the logger function here
+					return {
+						err: err.message,
+					};
+				}
+			},
+		},
+		createCourse: {
+			rest: {
+				method: "POST",
+				path: "/courses",
+			},
+			authentication: "required",
+			handler: async ({ params, meta }) => {
+				try {
+					await Joi.validate(params, newCourseValidation, {
+						abortEarly: false,
+					});
+					let newCourse = new Course({
+						...params,
+						author: meta.user._id,
+					});
+					let result = await newCourse.save();
+					return result;
+				} catch (err) {
+					return {
+						err: err.message,
+					};
+				}
+			},
+		},
+		getAllCourses: {
+			rest: {
+				method: "GET",
+				path: "/courses",
+			},
+			// authentication: "required",
+			handler: async ({ params }) => {
+				try {
+					const paginatorLabels = {
+						docs: "courses",
+						limit: "perPage",
+						nextPage: "next",
+						prevPage: "prev",
+						meta: "paginator",
+						page: "currentPage",
+						pagingCounter: "slNo",
+						totalPages: "pageCount",
+						totalDocs: "totalCourses",
+					};
+					const options = {
+						page: params.page ? params.page : 1,
+						limit: 10,
+						collation: {
+							locale: "en",
+						},
+						customLabels: paginatorLabels,
+						select: "name description author",
+						sort: { createdAt: -1 },
+						populate: {
+							path: "author",
+							select: "name username _id",
+						},
+					};
+					return await Course.paginate({}, options);
 				} catch (err) {
 					return {
 						err: err.message,

@@ -29,6 +29,11 @@ const UserSchema = new Schema(
 			type: String,
 			required: true,
 		},
+		user_type: {
+			type: String,
+			enum: ["student", "guru"],
+			default: "student",
+		},
 	},
 	{
 		timestamps: true,
@@ -43,6 +48,10 @@ UserSchema.pre("save", async function () {
 
 UserSchema.statics.dontExist = async function (options) {
 	return (await this.where(options).countDocuments()) === 0;
+};
+
+UserSchema.statics.findByQuery = async function (opts) {
+	return await this.findOne(opts);
 };
 
 UserSchema.methods.passwordCompare = async function (password) {
