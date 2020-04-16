@@ -1,0 +1,59 @@
+#BASIC QUERY
+query SayHello {
+	hello
+}
+
+#BASIC MUTATION
+mutation SayWelcome {
+	welcome(name: "Nandy Mandy")
+}
+
+mutation RegisterUser {
+	registerUser(
+		name: "Narendra Maurya"
+		email: "nandymandy12345@gmail.com"
+		username: "nandymandy12345"
+		user_type: "guru"
+		password: "Nandymandy111"
+	) {
+		message
+		user {
+			name
+			email
+			username
+			user_type
+		}
+		authToken
+		refreshToken
+	}
+}
+
+query LoginUser {
+	loginUser(username: "nandymandy12345", password: "Nandymandy111") {
+		message
+		user {
+			name
+			email
+			username
+			user_type
+		}
+		authToken
+		refreshToken
+	}
+}
+
+query ProfileUser {
+	me {
+		name
+		email
+		username
+		user_type
+	}
+}
+
+query RefreshTokens {
+	refreshTokens {
+		authToken
+		refreshToken
+	}
+}

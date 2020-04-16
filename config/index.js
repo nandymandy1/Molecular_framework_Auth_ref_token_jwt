@@ -7,6 +7,6 @@ module.exports = {
 	REFRESH_TOKEN_SECRET: "1234567890refresh",
 	DB:
 		MODE === "prod"
-			? "YOUR REMOTE DATABASE"
+			? "Your Remote Database URL"
 			: "mongodb://localhost:27017/mole-app",
 };
