@@ -1,25 +1,25 @@
 module.exports = {
 	root: true,
 	env: {
-		node: true,
-		commonjs: true,
 		es6: true,
-		jquery: false,
+		node: true,
 		jest: true,
+		jquery: false,
 		jasmine: true,
+		commonjs: true,
 	},
-	extends: "eslint:recommended",
 	parserOptions: {
-		sourceType: "module",
 		ecmaVersion: "2018",
+		sourceType: "module",
 	},
 	rules: {
-		indent: ["warn", "tab", { SwitchCase: 1 }],
-		quotes: ["warn", "double"],
-		semi: ["error", "always"],
 		"no-var": ["error"],
 		"no-console": ["off"],
+		semi: ["error", "always"],
+		quotes: ["warn", "double"],
 		"no-unused-vars": ["warn"],
 		"no-mixed-spaces-and-tabs": ["warn"],
+		indent: ["warn", "tab", { SwitchCase: 1 }],
 	},
+	extends: "eslint:recommended",
 };

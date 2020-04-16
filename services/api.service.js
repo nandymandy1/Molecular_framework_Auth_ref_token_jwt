@@ -4,6 +4,8 @@ const ApiGateway = require("moleculer-web");
 const DB_CONNECTOR = require("../config/db");
 const { authMiddleware } = require("../functions/auth");
 
+const { UnAuthorizedError } = ApiGateway.Errors;
+
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  * @typedef {import('http').IncomingMessage} IncomingRequest Incoming HTTP Request
@@ -34,7 +36,7 @@ module.exports = {
 				authentication: true,
 
 				// Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
-				authorization: false,
+				authorization: true,
 
 				// The auto-alias feature allows you to declare your route alias directly in your services.
 				// The gateway will dynamically build the full routes from service schema.
@@ -62,6 +64,7 @@ module.exports = {
 				 * @param {ServerResponse} res
 				 * @param {Object} data
 				 */
+
 				// onAfterCall(ctx, route, req, res, data) {
 				// 	// Async function which return with Promise
 				// 	// return doSomething(ctx, res, data);
@@ -109,8 +112,8 @@ module.exports = {
 		 *--> Authenticate the request. It check the `Authorization` token value in the request header.
 		 *--> Check the token value & resolve the user by the token.
 		 *--> The resolved user will be available in `ctx.meta.user`
-		 *
-		 *--> PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
+		 *--> PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION.
+		 *--> DO NOT USE IN PRODUCTION!
 		 *
 		 * @param {Context} ctx
 		 * @param {Object} route
@@ -118,26 +121,23 @@ module.exports = {
 		 * @returns {Promise}
 		 */
 		async authenticate(ctx, route, req) {
-			if (req.$action.authentication === "required") {
+			if (req.$action.auth === "required") {
 				let authToken = req.headers["authorization"];
 				if (authToken) {
 					let authUser = await authMiddleware(authToken);
 					if (!authUser) {
-						throw new ApiGateway.Errors.UnAuthorizedError(
-							"INVALID_TOKEN"
-						);
+						throw new UnAuthorizedError("INVALID_TOKEN");
 					} else {
 						// Returns the resolved user. It will be set to the `ctx.meta.user`
 						return authUser;
 					}
 				} else {
-					throw new ApiGateway.Errors.UnAuthorizedError("NO_TOKEN");
+					throw new UnAuthorizedError("NO_TOKEN");
 				}
 			} else {
 				return null;
 			}
 		},
-
 		/**
 		 * Authorize the request. Check that the authenticated user has right to access the resource.
 		 *
@@ -149,12 +149,14 @@ module.exports = {
 		 * @returns { Promise }
 		 */
 		async authorize(ctx, route, req) {
-			// // Get the authenticated user.
-			// const user = ctx.meta.user;
-			// // It check the `auth` property in action schema.
-			// if (req.$action.auth == "required" && !user) {
-			// 	throw new ApiGateway.Errors.UnAuthorizedError("NO_RIGHTS");
-			// }
+			if (
+				req.$action.role &&
+				req.$action.role !== ctx.meta.user.user_type
+			) {
+				throw new UnAuthorizedError("NO_RIGHTS");
+			} else {
+				return null;
+			}
 		},
 	},
 	async created() {

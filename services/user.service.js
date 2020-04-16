@@ -2,8 +2,7 @@
 
 const Joi = require("joi");
 const _ = require("lodash");
-const { User, Course } = require("../models");
-const { newCourseValidation } = require("../validators/course");
+const { User } = require("../models");
 const { loginValidate, registerValidate } = require("../validators/user");
 const { issueToken, issueNewTokens } = require("../functions/auth");
 
@@ -25,11 +24,6 @@ module.exports = {
 	 * Actions
 	 */
 	actions: {
-		/**
-		 * Say a 'Hello' action.
-		 *
-		 * @returns
-		 */
 		register: {
 			rest: {
 				method: "POST",
@@ -157,93 +151,23 @@ module.exports = {
 				}
 			},
 		},
-		createCourse: {
-			rest: {
-				method: "POST",
-				path: "/courses",
-			},
-			authentication: "required",
-			handler: async ({ params, meta }) => {
-				try {
-					await Joi.validate(params, newCourseValidation, {
-						abortEarly: false,
-					});
-					let newCourse = new Course({
-						...params,
-						author: meta.user._id,
-					});
-					let result = await newCourse.save();
-					return result;
-				} catch (err) {
-					return {
-						err: err.message,
-					};
-				}
-			},
-		},
-		getAllCourses: {
-			rest: {
-				method: "GET",
-				path: "/courses",
-			},
-			// authentication: "required",
-			handler: async ({ params }) => {
-				try {
-					const paginatorLabels = {
-						docs: "courses",
-						limit: "perPage",
-						nextPage: "next",
-						prevPage: "prev",
-						meta: "paginator",
-						page: "currentPage",
-						pagingCounter: "slNo",
-						totalPages: "pageCount",
-						totalDocs: "totalCourses",
-					};
-					const options = {
-						page: params.page ? params.page : 1,
-						limit: 10,
-						collation: {
-							locale: "en",
-						},
-						customLabels: paginatorLabels,
-						select: "name description author",
-						sort: { createdAt: -1 },
-						populate: {
-							path: "author",
-							select: "name username _id",
-						},
-					};
-					return await Course.paginate({}, options);
-				} catch (err) {
-					return {
-						err: err.message,
-					};
-				}
-			},
-		},
 	},
-
 	/**
 	 * Events
 	 */
 	events: {},
-
 	/**
 	 * Methods
 	 */
 	methods: {},
-
 	/**
 	 * Service created lifecycle event handler
 	 */
 	created() {},
-
 	/**
 	 * Service started lifecycle event handler
 	 */
 	async started() {},
-
 	/**
 	 * Service stopped lifecycle event handler
 	 */

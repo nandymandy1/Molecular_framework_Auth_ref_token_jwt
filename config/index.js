@@ -6,6 +6,6 @@ module.exports = {
 	REFRESH_TOKEN_SECRET: "1234567890refresh",
 	DB:
 		MODE === "prod"
-			? "your_remote_db_address"
+			? "YOUR REMOTE MONGO INSTANCE"
 			: "mongodb://localhost:27017/mole-app",
 };
